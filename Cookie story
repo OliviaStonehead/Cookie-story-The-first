@@ -1,0 +1,883 @@
+// Cookie story
+// Your bakery inside SSRPG
+// Made by Olivia
+// Version 1.0 Version name: The First
+// DO NOT LOOP THE LOCATION, IF YOU LOOP, THE
+// UI WILL DISSAPEAR, SO PLAY THIS IN WATERFALL
+// OR ANY LOCATION WHERE THE PLAYER DOESNT MOVES
+// If you find a way to keep the ui while inside
+// a loop, please share it and i will implement
+// that in future versions (+ credits for who
+// found the fix to it)
+
+// This is the storage system & important values
+var ll = loc.loop
+var lb = loc.begin
+var SS = storage.Set
+var SG = storage.Get
+var cookies = storage.Get(＂cookies＂,0)
+storage.Set(＂cookies＂,cookies)
+var pushers = storage.Get(＂pushers＂,0)
+storage.Set(＂pushers＂,pushers)
+var cont = storage.Get(＂cont＂,0)
+storage.Set(＂cont＂,cont)
+var fire = storage.Get(＂fire＂,0)
+storage.Set(＂fire＂,fire)
+var kieat = SG(＂kieat＂,0)
+SS(＂kieat＂,kieat)
+var serpent = SG(＂serpent＂,0)
+SS(＂serpent＂,serpent)
+var feeds = SG(＂feeds＂,0)
+SS(＂feeds＂,feeds)
+var rebplus = SG(＂rebplus＂,1)
+SS(＂rebplus＂,rebplus)
+var flowers = SG(＂flowers＂,0)
+SS(＂flowers＂,flowers)
+var workpower = SG(＂workpower＂,0)
+SS(＂workpower＂,workpower)
+var serpenthandler = SG(＂serpenthandler＂,0)
+SS(＂serpenthandler＂,serpenthandler)
+
+//This shows you your cookies, workers, etc.//
+
+?k = 0
+ >c-20,-11,#cyan,@player.name@'s bakery
+ >c@chpos1@,2,#rainFF,Cookies: @cookies@
+?rebplus > 1 & k = 0
+ >c@chpos1@,4,#rainFF,Multiplier: @rebplus@
+?k = 0
+ >c-20,-10,#cyan,Feeds: @feeds@ Feed cost: 
+^ @feedN@
+?show = 0 & n = 0 & k = 0
+^ | show = 2 & n = 0 & k = 0
+ >c-35,8,#yellow,Pushers hired: @pushers@ 
+^ Controllers hired: @cont@ Summoned Elementals:
+^ @fire@
+ >c-35,9,#yellow,Ki eaters: @kieat@ Serpents:
+^ @serpent@
+ >c-35,10,#yellow,Serpant handlers: 
+^@serpenthandler@
+?show = 1 & n = 0 & k = 0
+ >c-35,8,#green,Flowers: @flowers@ 
+ >c-34,9,#green,- Flowers are only cosmetic
+ >c-34,10,#green, - More flowers = new colors!
+
+
+// - - - - - Workers count - - - - - 
+
+var pushers = 0
+
+var cont = 0
+
+var fire = 0
+
+var kieat = 0
+
+var serpent = 0
+
+var serpenthandler = 0
+
+?totaltime % 50 = 1
+ pusherswork()
+ contwork()
+ firework()
+ kiwork()
+ serpentwork()
+ serphanwork()
+
+// - - Worker's price - - 
+
+var pushersprice = 10 
+
+var contprice = 50 
+
+var fireprice = 150
+
+var kieprice = 500
+
+var serpentp = 2500
+
+var serhandp = 7500
+
+?pushers >= 1
+ pushersprice = 10 + pushers * pushers
+
+?cont >= 1
+ contprice = 50 + ( cont * cont * 2 )
+
+?fire >= 1
+ fireprice = 150 + fire * fire * 3
+
+?kieat >= 1
+ kieprice = 500 + kieat * kieat * 5
+
+?serpent >= 1
+ serpentp = 2500 + serpent * serpent * 10
+
+?serpenthandler >= 1
+ serhandp = 7500 + serpenthandler
+^ * serpenthandler * 15
+
+// - Worker's production - - - - //
+
+func pusherswork()
+  cookies = cookies + (pushers * 1 * rebplus)
+
+var workpower
+ workpower = 0 + (pushers * 1 * rebplus)
+^   + (cont * 3 * rebplus) + (fire * 5 * 
+^ rebplus) + (kieat * 10 * rebplus) + (serpent
+^ * 25 * rebplus) + (serpenthandler * 50 *
+^ rebplus)
+?k = 0
+ >c@chpos1@,3,#rainFF,WorkPower: @workpower@
+
+
+func contwork()
+ cookies = cookies + cont * 3 * rebplus 
+
+func firework()
+ cookies = cookies + fire * 5 * rebplus 
+
+func kiwork()
+ cookies = cookies + kieat * 10 * rebplus 
+
+func serpentwork()
+ cookies = cookies + serpent * 25 * rebplus
+
+func serphanwork()
+ cookies = cookies + serpenthandler * 50 * 
+^ rebplus
+
+var Y = -7
+
+ //This puts the Bake Cookie Button
+ //in the place of the potion if the loc isnt 
+ //like a cinematic (without foes)
+
+var YN = -3
+
+?loc!Waterfall
+  Y = -4
+  YN = 0
+
+// - - -Hire/buy Buttons - - - - //
+var Cookie
+?lb | ll
+ Cookie = ui.AddButton() //BakeCookieButton
+Cookie.text = Bake Cookies
+Cookie.y = Y
+Cookie.x = -35
+Cookie.style = 2
+Cookie.sound = life_gain
+Cookie.SetPressed(AddCookie)
+
+var buypush = ui.AddButton() //BuyPusherButton
+buypush.text = Hire pusher
+buypush.h = 3
+buypush.y = -10
+buypush.x = 35
+buypush.sound = pickup_bronze
+buypush.SetPressed(BuyPusher)
+?show = 0 & lb
+ >c31,-9,Cost: @pushersprice@
+:?show = 1
+ >c30,-9,Cost: @flowcost@
+:?show = 2
+ >c30,-9,Gain: 10
+
+
+var buycont = ui.AddButton() //BuyContButton
+buycont.h = 3
+buycont.y = -7
+buycont.x = 35
+buycont.text = Hire controller
+buycont.sound = controller_whip_hit
+buycont.SetPressed(BuyCont)
+?show = 0 
+ >c30,-6,Cost: @contprice@
+:?show = 2 
+ >c30,-6,Gain: 50
+
+
+var buyfire = ui.AddButton() //BuyFireButton
+buyfire.h = 3
+buyfire.y = -4
+buyfire.x = 35
+buyfire.sound = fire_elemental_awake
+buyfire.text = Summon fire elemental
+buyfire.SetPressed(BuyFire)
+?buyfire.visible = true
+ >c30,-3,Cost: @fireprice@
+:?show=2
+ >c30,-3,Gain: 150
+
+
+var buyki = ui.AddButton() //Buy Ki Button
+buyki.h = 3
+buyki.y = -1
+buyki.x = 35
+buyki.text = Buy Ki eater
+buyki.sound = ki_eater_awake
+buyki.SetPressed(BuyKieat)
+?buyki.visible = true 
+  >c30,0,Cost: @kieprice@
+:?show = 2
+ >c30,0,Gain: 500
+
+var buyserp = ui.AddButton()
+buyserp.text = Buy serpent
+buyserp.x = 35
+buyserp.y = 2
+buyserp.h = 3
+buyserp.SetPressed(buyser)
+?show = 0 
+ buyserp.visible = true
+ >c30,3,Cost: @serpentp@
+:?show = 2 
+ >c30,3,Gain: 2500
+?show!0
+ buyserp.visible = false
+
+var buyshan = ui.AddButton()
+buyshan.text = Hire Serpent Handler
+buyshan.h= 3
+buyshan.y= 5
+buyshan.x =35
+buyshan.SetPressed(bserphan)
+?show = 0
+ buyshan.visible = true
+  >c30,6,Cost: @serhandp@
+:?show = 2
+ buyshan.visible = false
+ >c30,6,Gain: 7500
+:?show=1 | show = 3
+ buyshan.visible = false
+
+
+// - - - Extra Buttons - - - /
+
+
+var ol = ui.AddButton()
+ol.h = 3
+ol.w = 4
+ol.y = -10
+ol.x = 10
+ol.text = AddC
+ol.SetPressed(olivia)
+?player.name = QuarterOlivia
+ ol.visible = true
+:
+ ol.visible = false
+
+var hidb = 0
+var hidebuy = ui.AddButton()
+hidebuy.h = 3
+hidebuy.y = -10
+hidebuy.x = 20
+?show = 0 | show = 2
+ hidebuy.text = Deco
+ hidebuy.w = 4
+:?show = 1 
+ hidebuy.text = Workers
+ hidebuy.w = 7
+
+hidebuy.SetPressed(hdbuy)
+
+func hdbuy()
+ ?show = 0 
+  show = 1
+ :?show = 1
+  show = 0
+ :?show = 2
+  show = 1
+  
+
+var hsw = ui.AddButton()
+hsw.y = 6
+hsw.x = -40
+hsw.h = 3
+hsw.w = 10
+hsw.sound = none
+hsw.SetPressed(nplus)
+?n = 0
+ hsw.text = Hide stats
+?n = 1
+ hsw.text = Show stats
+
+func nplus()
+ ?n = 0
+  n = 1
+  play unequip
+ :?n = 1
+  n = 0
+  play equip
+
+
+
+// - - - Plants and other - - - //
+
+
+var show = 0
+var flowers = 0
+var flowcost = 1000
+var fl = 0
+
+var buyflower = ui.AddButton()
+buyflower.h = 3
+buyflower.y = -10
+buyflower.x = 35
+buyflower.text = Buy flower
+buyflower.SetPressed(flower)
+
+?show = 0
+ buyflower.visible = false
+ buypush.visible = true
+ buycont.visible = true
+ buyfire.visible = true
+ buyki.visible = true
+ buyserp.visible = true
+ 
+
+:?show = 1
+ buyflower.visible = true
+ buypush.visible = false
+ buycont.visible = false
+ buyfire.visible = false
+ buyki.visible = false
+ buyserp.visible = false
+
+:?show = 3
+ buyflower.visible = false
+ buypush.visible = false
+ buycont.visible = false
+ buyfire.visible = false
+ buyki.visible = false
+ buyserp.visible = false
+ buyshan.visible = false
+
+
+
+
+func flower()
+ ?cookies >= 1000
+  play buy
+  cookies = cookies - flowcost
+  flowers++
+
+var flow = ui.AddAnim(ascii
+#h#
+cOb
+＂u,
+%%
+c#h
+`O,
+u|b
+%%
+#c#
+uOh
+'b,
+%%
+u#c
+`O,
+b|h
+%%
+#u#
+bOc
+`h,
+%%
+b#u
+`O,
+h|c
+%%
+#b#
+hOu
+`c,
+%%
+h#b
+`O,
+c|u
+asciiend)
+
+flow.loop = true
+flow.duration = 100
+flow.y = 10
+flow.x = 4
+
+?flowers = 0
+ flow.visible = false
+:?flowers > 0
+ flow.visible = true
+
+?flowers > 0 
+ flow.Play()
+ ?flowers < 4
+  flow.color= #white
+?flowers >= 4 & flowers < 8
+  flow.color = #cyan
+?flowers >= 8 & flowers < 16
+  flow.color = #yellow
+?flowers >= 16 & flowers < 32
+  flow.color = #green
+?flowers >= 32 & flowers < 64
+  flow.color = #red
+?flowers >= 64 & flowers!0
+  flow.color = #rainFF
+
+
+// - - - FEED NAGARAJA & Mul - - - - - - - - //
+var rebplus = 1 
+var feedN = 10000 
+?feeds >= 1
+ feedN = 10000 * (feeds * 2)
+:?feeds = 0
+ feedN = 10000
+var feeds = 0
+var Feed
+?lb | ll
+ Feed = ui.AddButton()
+Feed.text = FEED NAGARAJA
+Feed.style = -2
+Feed.y = YN
+Feed.x = -35
+Feed.h = 3
+Feed.SetPressed(FEED)
+
+func FEED()
+ ?cookies >= feedN
+  play nagaraja_awake_swallow
+  cookies = 0
+  pushers = 0
+  cont = 0
+  fire = 0
+  kieat = 0
+  feeds = feeds + 1
+  pushersprice = 10
+  contprice = 50
+  fireprice = 150
+  kieprice = 500
+  flowers = 0
+  flow.Stop()
+  flow.color = #white
+  rebplus++
+  serpent = 0
+  serpentp = 2500
+  serpenthandler = 0
+  serhandp = 7500
+
+
+
+
+      // - - - - functions - - - - //
+
+var cook
+cook = ui.AddAnim(ascii
+######
+######
+######
+######
+######
+%%
+######
+######
+######
+#.--.
+#•*°☆#
+%%
+######
+######
+#.--.
+/ . :\
+*+×`^*
+%%
+######
+#.--.
+/ . :\
+\.   /
+#°*•°#
+%%
+#.--.#
+/ . :\
+\.__,/
+##*°☆#
+%%
+#.--.#
+/ . :\
+\.__,/
+######
+%%
+#•*☆÷#
+/ . :\
+\.__,/
+######
+%%
+°•*☆°•
+\.__,/
+######
+######
+%%
+#☆*.•#
+☆*__*☆
+######
+######
+%%
+##*.##
+##☆`##
+######
+######
+%%
+######
+asciiend)
+cook.duration = 20
+cook.loop = false
+cook.color = #rainFF
+func AddCookie()
+ cook.Play()
+ cookies = cookies + 1 * rebplus
+ cook.y = miny + rng % (maxy - miny + 1)
+ cook.x = minx + rng % (maxx - minx + 1)
+
+var miny = 0
+var maxy = -10
+var minx = -10
+var maxx = -20
+
+var n = SG(＂n＂,0)
+SS(＂n＂,n)
+ 
+func BuyPusher()
+ ?cookies >= pushersprice
+  cookies = cookies - pushersprice
+  pushers++
+
+func sellpu()
+ ?pushers > 0
+  cookies = cookies + 10
+  pushers--
+
+
+func BuyCont()
+ ?cookies >= contprice
+  cookies = cookies - contprice
+  cont++
+
+func BuyFire()
+ ?cookies >= fireprice
+  cookies = cookies - fireprice
+  fire++
+
+func BuyKieat()
+ ?cookies >= kieprice
+  cookies = cookies - kieprice
+  kieat++
+
+func buyser()
+ ?cookies >= serpentp
+  play serpent_attack
+  cookies = cookies - serpentp
+  serpent++
+
+func bserphan()
+ ?cookies >= serhandp
+  play serpent_handler_release
+  cookies = cookies - serhandp
+  serpenthandler++
+
+func olivia()
+ cookies = cookies + 15000
+
+func wipedata()
+  cookies = 0
+  rebplus = 1
+  pushers = 0
+  cont = 0
+  fire = 0
+  kieat = 0
+  feeds = 0
+  feedN = 10000
+  pushersprice = 10
+  contprice = 50
+  fireprice = 150
+  kieprice = 500
+  flowers = 0
+  serpent = 0
+  serpentp = 2500
+  serpenthandler = 0
+  serhandp = 7500
+
+
+// - - - - - Sell buttons - - - - - - - - - //
+
+var sp = ui.AddButton()
+sp.h= 3
+sp.y= -7
+sp.x= 20
+sp.SetPressed(hs)
+?show = 0 
+ sp.text = Unhire
+ sp.w = 4
+:?show = 2
+ sp.text = Hire
+ sp.w = 4
+:?show = 1
+ sp.text = Unhire
+ sp.w = 4
+
+var sellp = ui.AddButton()
+sellp.h = 3
+sellp.y = -10
+sellp.x = 35
+sellp.sound = insta_kill
+sellp.text = Unhire pusher
+sellp.SetPressed(sellpu)
+
+?show = 2
+   buyflower.visible = false
+   buypush.visible = false
+   buycont.visible = false
+   buyfire.visible = false
+   buyki.visible = false
+   sellp.visible = true
+:?show = 0 | show = 1
+ sellp.visible = false
+
+var sellc = ui.AddButton()
+sellc.h = 3
+sellc.y = -7
+sellc.x = 35
+sellc.sound = insta_kill
+sellc.text = Unhire controller
+sellc.SetPressed(sellco)
+?show = 2
+ sellc.visible = true
+:?show = 0 | show = 1
+ sellc.visible = false
+
+func sellco()
+ ?cont>0
+  cookies = cookies + 50
+  cont--
+
+var unsfire = ui.AddButton()
+unsfire.h = 3
+unsfire.text = Uns fire elemental
+unsfire.y = -4
+unsfire.x = 35
+unsfire.sound = fire_elemental_death
+unsfire.SetPressed(sellf)
+?show = 2
+ unsfire.visible = true
+:?show!2
+ unsfire.visible = false
+
+func sellf()
+ ?fire> 0
+  cookies = cookies + 150
+  fire--
+
+var sellki = ui.AddButton()
+sellki.text = Sell Ki eater
+sellki.y = -1
+sellki.x = 35
+sellki.h = 3
+sellki.SetPressed(sellk)
+?show = 2
+ sellki.visible = true
+:?show = 0 | show = 1
+ sellki.visible = false
+
+func sellk()
+ ?kieat >= 1
+  cookies = cookies + 500
+  kieat--
+   
+var sellserpent = ui.AddButton()
+sellserpent.text = Sell serpent
+sellserpent.y= 2
+sellserpent.x = 35
+sellserpent.h = 3
+sellserpent.SetPressed(sells)
+?show = 2
+ sellserpent.visible = true
+:?show = 0 | show = 1
+ sellserpent.visible = false
+
+func sells()
+ ?serpent >= 1
+  cookies = cookies + 2500
+  serpent--
+
+var unhiserphan = ui.AddButton()
+unhiserphan.text = Unhire serp handler
+unhiserphan.y = 5
+unhiserphan.x = 35
+unhiserphan.h = 3
+unhiserphan.SetPressed(sellsh)
+?show = 2
+ unhiserphan.visible = true
+:?show = 0 | show = 1
+ unhiserphan.visible = false
+
+func sellsh()
+ ?serpenthandler >= 1
+  cookies = cookies + 7500
+  serpenthandler--
+
+ 
+
+func hs()
+ ?show = 0
+  show = 2
+ :?show=2
+  show = 0
+ :?show = 1
+  show = 2
+// - Config UI - - - - - - - - - - - - //
+
+var config = ui.AddButton()
+config.h = 3
+config.w = 4
+config.y = 9
+config.x = -40
+config.SetPressed(openconf)
+
+var wipe = ui.AddButton()
+wipe.h = 3
+wipe.x = 0
+wipe.y = 0
+wipe.text = WIPE DATA
+wipe.style = 2
+wipe.sound = perfected_energy_ball_hit
+wipe.SetPressed(wipedata)
+
+
+var mustext = ui.AddText()
+mustext.text = Music
+mustext.y = -6
+mustext.x = -2
+mustext.align = center
+
+var cookubi = ui.AddButton()
+cookubi.y = 5
+cookubi.x = 0
+cookubi.h = 3
+cookubi.style = 2
+cookubi.text = Change info loc
+cookubi.SetPressed(chub)
+
+var chpos1 = SG(＂chpos1＂,-1)
+SS(＂chpos1＂,chpos1)
+
+func chub()
+ ?chpos1 = -1
+  chpos1 = -40
+ :?chpos1 = -40
+  chpos1 = -1
+var configpanel = ui.AddPanel()
+configpanel.w = 30
+configpanel.h = 20
+configpanel.Add(mustext)
+configpanel.Add(wipe)
+configpanel.Add(cookubi)
+
+func openconf()
+  ?k = 0
+   k=1
+  :?k = 1
+   k = 0
+var musicbut = ui.AddButton()
+musicbut.h = 3
+musicbut.y = -5
+musicbut.style = 2
+musicbut.sound = xp_tick
+musicbut.SetPressed(ch)
+musicbut.text = Change music
+
+var musec = SG(＂musec＂,0)
+SS(＂musec＂,musec)
+
+?musec = 0
+ music.Play(bone_factory)
+
+:?musec = 1
+ music.Play(rocky_plateau_1)
+
+:?musec = 2
+ music.Play(deadwood_1)
+
+:?musec = 3
+ music.Play(caustic_caves)
+
+:?musec = 4
+ music.Play(fungus_forest_1)
+
+:?musec = 5
+ music.Play(undead_crypt_1)
+
+:?musec = 6
+ music.Play(bronze_mine_1)
+
+:?musec = 7
+ music.Play(icy_ridge_1)
+
+:?musec = 8
+ music.Play(temple_1)
+
+:?musec = 9
+ music.Play(shop)
+
+:?musec = 10
+ music.Play(uulaa)
+
+:?musec = 11
+ music.Play(rocky_plateau_talk)
+
+:?musec = 12
+ music.Play(tree_boss)
+
+:?musec = 13
+ music.Play(spider_boss)
+
+:?musec = 14
+ music.Play(mushroom_boss)
+
+:?musec = 15
+ music.Play(skeleton_boss)
+
+:?musec = 16
+ music.Play(bronze_guardian_3)
+
+:?musec = 17
+ music.Play(yeti)
+
+:?musec = 18
+ music.Play(nagaraja)
+
+:?musec = 19
+ music.Play(rocky_plateau_fight)
+
+ 
+
+
+
+func ch()
+ ?musec < 20
+  musec++
+ ?musec = 20
+  musec = 0
+
+var k = 0
+
+?k = 0
+ configpanel.visible  = false
+ musicbut.visible = false
+ wipe.visible = false
+ cookubi.visible = false
+ config.text = Config
+:?k = 1
+ configpanel.visible = true
+ musicbut.visible = true
+ wipe.visible = true
+ cookubi.visible = true
+ config.text = Close
+
